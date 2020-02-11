@@ -79,21 +79,6 @@ class DBInterface():
         cursor.execute(ids_with_simhash_query_template, (simhash,))
         return [row['ad_creative_id'] for row in cursor.fetchall()]
 
-    def all_ad_creative_ids_with_duplicated_simhash(self):
-        """Returns map of ad creative body simhash -> ad_creative_id for
-        simhashes that appear 2 or more times in database.
-
-        Returns: dict of simhash (str) -> ad_creative_id (str) where all
-        ad_creative_body simhash match the simhash key. Dict only hash simhashes
-        that appear 2 or more times in database.
-        """
-        duplicate_simhashes = self.duplicate_ad_creative_text_simhashes()
-        simhash_to_id = {}
-        for simhash in duplicate_simhashes:
-            simhash_to_id[simhash] = self.ad_creative_ids_with_text_simhash(simhash)
-        return simhash_to_id
-
-
     def all_archive_ids_without_image_hash(self):
         """Get ALL ad archive IDs that do not exist in ad_images table.
 
