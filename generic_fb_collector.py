@@ -16,6 +16,7 @@ from OpenSSL import SSL
 
 from db_functions import DBInterface
 from slack_notifier import notify_slack
+import standard_logger_config
 
 DEFAULT_MINIMUM_EXPECTED_NEW_ADS = 10000
 DEFAULT_MINIMUM_EXPECTED_NEW_IMPRESSIONS = 10000
@@ -447,7 +448,6 @@ def send_completion_slack_notification(
             ":rotating_light: :rotating_light: :rotating_light: "
             f" {error_log_msg} "
             ":rotating_light: :rotating_light: :rotating_light: ")
-        completion_status = 'Failure'
 
     completion_message = (
         f"{slack_msg_error_prefix}Collection started at{start_time} for "
@@ -472,6 +472,7 @@ def main(config, country_code):
     logging.info('Expecting minimum %d new impressions.', min_expected_new_impressions)
 
     connection = get_db_connection(config)
+    logging.info('Established conneciton to %s', connection.dsn)
     db = DBInterface(connection)
     search_runner = SearchRunner(
         datetime.date.today(),
@@ -522,11 +523,8 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read(sys.argv[1])
     country_code = config['SEARCH']['COUNTRY_CODE'].lower()
-    logging.basicConfig(handlers=[logging.FileHandler(f"{country_code}_fb_api_collection.log"),
-                              logging.StreamHandler()],
-                        format='[%(levelname)s\t%(asctime)s] {%(pathname)s:%(lineno)d} %(message)s',
-                        level=logging.INFO)
 
+    standard_logger_config.configure_logger(f"{country_code}_fb_api_collection.log")
     if len(sys.argv) < 2:
         exit(f"Usage:python3 {sys.argv[0]} generic_fb_collector.cfg")
     main(config, country_code)
